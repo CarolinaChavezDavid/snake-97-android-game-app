@@ -1,3 +1,11 @@
 <resources>
     <string name="app_name">snake-97-android-game-app</string>
+    <string name="game_name">Snake 97</string>
+    <string name="new_game">NEW GAME</string>
+    <string name="players">PLAYER</string>
+    <string name="high_scores">HIGH SCORES</string>
+    <string name="about">ABOUT</string>
+    <string name="configurations">CONFIGURATIONS</string>
+    <string name="score">YOUR SCORE: </string>
+
 </resources>

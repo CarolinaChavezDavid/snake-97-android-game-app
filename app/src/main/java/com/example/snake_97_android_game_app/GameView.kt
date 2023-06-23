@@ -1,4 +1,4 @@
-package com.example.snake_97_android_game_app
+package com.example.snake_97_android_game_app // ktlint-disable package-name
 
 import android.content.Context
 import android.graphics.Canvas
