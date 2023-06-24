@@ -8,10 +8,11 @@ import android.os.Handler
 import android.os.Looper
 import android.view.MotionEvent
 import android.view.View
+import com.example.snake_97_android_game_app.model.Directions
 import java.util.*
 import kotlin.random.Random
 
-class GameView(context: Context) : View(context) {
+class GameView(context: Context): View(context) {
 
     private val boardSize = 20
     private val cellSize: Int
@@ -37,7 +38,7 @@ class GameView(context: Context) : View(context) {
 
     private var snake: LinkedList<Point> = LinkedList()
     private var food: Point? = null
-    private var direction = Direction.RIGHT
+    private var direction = Directions.RIGHT
 
     init {
         resetGame()
@@ -55,7 +56,7 @@ class GameView(context: Context) : View(context) {
         snake.clear()
         snake.add(Point(boardSize / 2, boardSize / 2))
         generateFood()
-        direction = Direction.RIGHT
+        direction = Directions.RIGHT
         gameRunning = true
         score = 0
     }
@@ -79,10 +80,10 @@ class GameView(context: Context) : View(context) {
         val head = snake.peekFirst()
         val newPoint = Point(head)
         when (direction) {
-            Direction.UP -> newPoint.y--
-            Direction.DOWN -> newPoint.y++
-            Direction.LEFT -> newPoint.x--
-            Direction.RIGHT -> newPoint.x++
+            Directions.UP -> newPoint.y--
+            Directions.DOWN -> newPoint.y++
+            Directions.LEFT -> newPoint.x--
+            Directions.RIGHT -> newPoint.x++
         }
 
         // Check for collisions
@@ -155,18 +156,18 @@ class GameView(context: Context) : View(context) {
         }
 
         when (event.action) {
-            MotionEvent.ACTION_DOWN -> {
+            MotionEvent.ACTION_UP -> {
                 val x = event.x.toInt() / cellSize
                 val y = event.y.toInt() / cellSize
                 val head = snake.peekFirst()
                 if (x < head.x) {
-                    direction = Direction.LEFT
+                    direction = Directions.LEFT
                 } else if (x > head.x) {
-                    direction = Direction.RIGHT
+                    direction = Directions.RIGHT
                 } else if (y < head.y) {
-                    direction = Direction.UP
+                    direction = Directions.UP
                 } else if (y > head.y) {
-                    direction = Direction.DOWN
+                    direction = Directions.DOWN
                 }
             }
         }
@@ -174,7 +175,5 @@ class GameView(context: Context) : View(context) {
         return true
     }
 
-    private enum class Direction {
-        UP, DOWN, LEFT, RIGHT
-    }
+
 }
