@@ -7,5 +7,7 @@
     <string name="about">ABOUT</string>
     <string name="configurations">CONFIGURATIONS</string>
     <string name="score">YOUR SCORE: </string>
+    <string name="game_over">GAME OVER</string>
+
 
 </resources>

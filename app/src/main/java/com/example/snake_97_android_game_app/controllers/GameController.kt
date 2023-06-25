@@ -1,12 +1,8 @@
 package com.example.snake_97_android_game_app.controllers // ktlint-disable package-name
 
-import android.graphics.Point
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.ui.geometry.Size
-import com.example.snake_97_android_game_app.model.Directions.DOWN
-import com.example.snake_97_android_game_app.model.Directions.LEFT
-import com.example.snake_97_android_game_app.model.Directions.RIGHT
-import com.example.snake_97_android_game_app.model.Directions.UP
+import androidx.compose.ui.unit.dp
+import com.example.snake_97_android_game_app.model.Directions.*
 import com.example.snake_97_android_game_app.model.SnakeState
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
@@ -25,42 +21,21 @@ class GameController(
 ) {
     private val mutex = Mutex()
 
-    var snakeLength = 2
-
-    private lateinit var currentSnakeSize: LinkedList<Point>
-    private var currentFoodPoint: Point = Point()
+    private lateinit var currentSnakeSize: MutableList<Pair<Int, Int>>
+    private var currentFoodPoint: Pair<Int, Int> = Pair(0, 0)
     private var currentScore: Int = 0
 
     private val mutableGameState =
         MutableStateFlow(
             SnakeState(
-                snake = LinkedList(),
-                food = Point(500, 500),
+                snake = mutableListOf(Pair(7, 7)),
+                food = Pair(5, 5),
                 currentDirection = RIGHT,
                 score = 0,
             ),
         )
 
     val state: Flow<SnakeState> = mutableGameState
-
-    private fun resetGame() {
-        mutableGameState.update { snakeState ->
-            snakeState.copy(
-                snake = LinkedList(),
-                food = Point(),
-                currentDirection = RIGHT,
-                score = 0,
-            )
-        }
-
-       /* scope
-        mutableState
-        snake.add(Point(boardSize / 2, boardSize / 2))
-        generateFood()
-        direction = Directions.RIGHT
-        gameRunning = true
-        score = 0*/
-    }
 
     var direction = RIGHT
         set(value) {
@@ -71,7 +46,7 @@ class GameController(
             }
         }
 
-    var boardSize = Size(1000F, 1200F)
+    var movement = Pair(0, 1)
         set(value) {
             scope.launch {
                 mutex.withLock {
@@ -80,44 +55,99 @@ class GameController(
             }
         }
 
-    private val boardWidth = boardSize.width
-    private val boardHeight = boardSize.height
+    fun resetGame() {
+        mutableGameState.update { snakeState ->
+            snakeState.copy(
+                snake = mutableListOf(Pair(7, 7)),
+                food = Pair(5, 5),
+                currentDirection = RIGHT,
+                score = 0,
+            )
+        }
+
+        movement = Pair(0, 1)
+        direction = RIGHT
+    }
+
+    var boardWidth = 100.dp
+        set(value) {
+            scope.launch {
+                mutex.withLock {
+                    field = value
+                }
+            }
+        }
+
+    var boardHeight = 100.dp
+        set(value) {
+            scope.launch {
+                mutex.withLock {
+                    field = value
+                }
+            }
+        }
+
+    var snakeSize = 20
+        set(value) {
+            scope.launch {
+                mutex.withLock {
+                    field = value
+                }
+            }
+        }
+
     private val isPlaying = mutableStateOf(true)
-    private val screenDivider = boardWidth.times(0.1)
-    val snakeUnit = boardWidth.div(screenDivider).toInt()
 
     init {
         scope.launch {
-            while (isPlaying.value) {
-                delay(100)
+            var snakeLength = 2
+            while (true) {
+                delay(200)
                 mutableGameState.update { gameState ->
-                    val newPoint = gameState.snake.peekFirst()?.let { Point(it) }
-                    if (newPoint != null) {
-                        when (direction) {
-                            UP -> newPoint.y--
-                            DOWN -> newPoint.y++
-                            LEFT -> newPoint.x--
-                            RIGHT -> newPoint.x++
-                        }
+                    var currentPoint = gameState.snake.first()
+                   /* val newPosition = Pair(
+                        currentPoint.first.plus(SNAKE_SIZE),
+                        currentPoint.second.plus(SNAKE_SIZE),
+                    )*/
+                    movement = when (direction) {
+                        UP -> Pair(0, -1)
+                        DOWN -> Pair(0, 1)
+                        LEFT -> Pair(-1, 0)
+                        RIGHT -> Pair(1, 0)
+                    }
 
-                        if (newPoint.x < 0 || newPoint.y < 0 || newPoint.x >= boardWidth || newPoint.y >= boardHeight ||
-                            mutableGameState.value.snake.contains(newPoint)
-                        ) {
-                            isPlaying.value = false
-                            resetGame()
-                            onGameOver.invoke()
-                        }
+                    val newPosition =
+                        Pair(
+                            (currentPoint.first + movement.first + SNAKE_SIZE) % SNAKE_SIZE,
+                            (currentPoint.second + movement.second + SNAKE_SIZE) % SNAKE_SIZE,
+                        )
+
+                    val hasReachedLeftEnd =
+                        currentPoint.first == 0 && gameState.currentDirection == LEFT
+                    val hasReachedTopEnd =
+                        currentPoint.second == 0 && gameState.currentDirection == UP
+                    val hasReachedRightEnd =
+                        currentPoint.first == SNAKE_SIZE - 1 && gameState.currentDirection == RIGHT
+                    val hasReachedBottomEnd =
+                        currentPoint.second == SNAKE_SIZE - 1 && gameState.currentDirection == DOWN
+                    if (hasReachedLeftEnd || hasReachedTopEnd || hasReachedRightEnd || hasReachedBottomEnd) {
+                        isPlaying.value = false
+                        resetGame()
+                        currentSnakeSize.clear()
+                        onGameOver.invoke()
+                        // navController.navigate(AppScreens.GameOverScreen.route)
                     }
 
                     currentSnakeSize = gameState.snake
-                    currentSnakeSize.push(newPoint)
-                    if (newPoint == gameState.food) {
-                        currentFoodPoint = Point(
-                            Random().nextInt(boardWidth.toInt()),
+                    currentSnakeSize.add(newPosition)
+                    if (newPosition == gameState.food) {
+                        currentFoodPoint = Pair(
+                            Random().nextInt(SNAKE_SIZE),
                             Random().nextInt(
-                                boardHeight.toInt(),
+                                SNAKE_SIZE,
                             ),
                         )
+                        snakeLength++
                         currentScore++
                     } else {
                         currentFoodPoint = gameState.food
@@ -125,7 +155,7 @@ class GameController(
                     }
 
                     gameState.copy(
-                        snake = currentSnakeSize,
+                        snake = (mutableListOf(newPosition) + gameState.snake.take(snakeLength - 1)).toMutableList(),
                         food = currentFoodPoint,
                         currentDirection = direction,
                         score = currentScore,
@@ -133,5 +163,9 @@ class GameController(
                 }
             }
         }
+    }
+
+    companion object {
+        const val SNAKE_SIZE = 20
     }
 }
