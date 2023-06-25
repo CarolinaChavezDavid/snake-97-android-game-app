@@ -1,6 +1,7 @@
 package com.example.snake_97_android_game_app.ui.screens
 
 import android.util.Log
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.gestures.detectDragGestures
@@ -9,15 +10,18 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.* // ktlint-disable no-wildcard-imports
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import com.example.snake_97_android_game_app.R
 import com.example.snake_97_android_game_app.controllers.GameController
 import com.example.snake_97_android_game_app.model.Directions
 import com.example.snake_97_android_game_app.model.Directions.RIGHT
 import com.example.snake_97_android_game_app.ui.theme.davysGray
-import com.example.snake_97_android_game_app.ui.theme.red_munsell
+import com.example.snake_97_android_game_app.ui.theme.lime
 import kotlin.math.abs
 
 @Composable
@@ -29,7 +33,8 @@ fun GameBoard(gameController: GameController) {
     BoxWithConstraints(
         modifier = Modifier
             .fillMaxSize()
-            .border(4.dp, davysGray, RoundedCornerShape(20.dp))
+            .clip(RoundedCornerShape(16.dp))
+            .background(lime)
             .pointerInput(Unit) {
                 detectDragGestures { change, dragAmount ->
                     val direction = getDragDirection(dragAmount)
@@ -52,10 +57,12 @@ fun GameBoard(gameController: GameController) {
                     .offset(x = xRate * snakeState.food.first, y = yRate * snakeState.food.second)
                     .size(yRate)
                     .background(
-                        red_munsell,
+                        lime,
                         CircleShape,
                     ),
-            )
+            ) {
+                Image(painter = painterResource(id = R.drawable.ic_apple), contentDescription = "")
+            }
             state.value?.snake?.forEach {
                 Box(
                     modifier = Modifier

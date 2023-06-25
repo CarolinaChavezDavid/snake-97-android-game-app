@@ -2,7 +2,7 @@ package com.example.snake_97_android_game_app.ui.screens
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.* // ktlint-disable no-wildcard-imports
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment.Companion.CenterHorizontally
@@ -41,7 +41,7 @@ fun GameOverScreen(
             contentDescription = "Sad emoji",
         )
         Row(modifier = Modifier.align(CenterHorizontally)) {
-            MenuItem(text = "RETRY", action = { retryGame }, width = 150)
+            MenuItem(text = "RETRY", action = { retryGame.invoke() }, width = 150)
             MenuItem(text = "EXIT", action = { activity.finish() }, width = 150)
         }
     }

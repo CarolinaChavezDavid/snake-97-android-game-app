@@ -42,7 +42,7 @@ class GameActivity : ComponentActivity() {
             if (isPlaying.value) {
                 GameBoardScreen(gameController)
             } else {
-                GameOverScreen() {
+                GameOverScreen {
                     gameController.resetGame()
                     isPlaying.value = true
                 }

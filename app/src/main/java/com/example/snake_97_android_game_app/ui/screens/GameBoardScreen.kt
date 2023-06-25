@@ -9,6 +9,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -28,7 +29,7 @@ fun GameBoardScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(lime)
+            .background(davysGray)
             .padding(16.dp),
     ) {
         Row(
@@ -41,15 +42,15 @@ fun GameBoardScreen(
                 onClick = { activity.finish() },
             ) {
                 Icon(
-                    modifier = Modifier.size(50.dp),
+                    modifier = Modifier.size(60.dp),
                     imageVector = Icons.Outlined.ArrowBack,
                     contentDescription = "",
-                    tint = davysGray,
+                    tint = lime,
                 )
             }
             Text(
                 text = " ${stringResource(id = R.string.score)} ${state.value?.score}",
-                color = davysGray,
+                color = lime,
                 style = GameTypography.titleMedium,
             )
         }

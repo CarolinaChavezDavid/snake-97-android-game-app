@@ -21,7 +21,6 @@ class GameController(
 ) {
     private val mutex = Mutex()
 
-    private lateinit var currentSnakeSize: MutableList<Pair<Int, Int>>
     private var currentFoodPoint: Pair<Int, Int> = Pair(0, 0)
     private var currentScore: Int = 0
 
@@ -96,6 +95,15 @@ class GameController(
             }
         }
 
+    var lastMovement = Pair(0, 1)
+        set(value) {
+            scope.launch {
+                mutex.withLock {
+                    field = value
+                }
+            }
+        }
+
     private val isPlaying = mutableStateOf(true)
 
     init {
@@ -104,11 +112,8 @@ class GameController(
             while (true) {
                 delay(200)
                 mutableGameState.update { gameState ->
-                    var currentPoint = gameState.snake.first()
-                   /* val newPosition = Pair(
-                        currentPoint.first.plus(SNAKE_SIZE),
-                        currentPoint.second.plus(SNAKE_SIZE),
-                    )*/
+                    val currentPoint = gameState.snake.first()
+
                     movement = when (direction) {
                         UP -> Pair(0, -1)
                         DOWN -> Pair(0, 1)
@@ -116,11 +121,19 @@ class GameController(
                         RIGHT -> Pair(1, 0)
                     }
 
-                    val newPosition =
-                        Pair(
-                            (currentPoint.first + movement.first + SNAKE_SIZE) % SNAKE_SIZE,
-                            (currentPoint.second + movement.second + SNAKE_SIZE) % SNAKE_SIZE,
+                    if (
+                        (
+                        (movement.first + movement.second == 0) &&
+                            (lastMovement.second + lastMovement.second == 0)
                         )
+                    ) {
+                        movement = lastMovement
+                    }
+
+                    val newPosition = Pair(
+                        (currentPoint.first + movement.first + SNAKE_SIZE) % SNAKE_SIZE,
+                        (currentPoint.second + movement.second + SNAKE_SIZE) % SNAKE_SIZE,
+                    )
 
                     val hasReachedLeftEnd =
                         currentPoint.first == 0 && gameState.currentDirection == LEFT
@@ -130,28 +143,31 @@ class GameController(
                         currentPoint.first == SNAKE_SIZE - 1 && gameState.currentDirection == RIGHT
                     val hasReachedBottomEnd =
                         currentPoint.second == SNAKE_SIZE - 1 && gameState.currentDirection == DOWN
+
                     if (hasReachedLeftEnd || hasReachedTopEnd || hasReachedRightEnd || hasReachedBottomEnd) {
                         isPlaying.value = false
                         resetGame()
-                        currentSnakeSize.clear()
                         onGameOver.invoke()
-                        // navController.navigate(AppScreens.GameOverScreen.route)
                     }
 
-                    currentSnakeSize = gameState.snake
-                    currentSnakeSize.add(newPosition)
                     if (newPosition == gameState.food) {
                         currentFoodPoint = Pair(
-                            Random().nextInt(SNAKE_SIZE),
+                            Random().nextInt(10),
                             Random().nextInt(
-                                SNAKE_SIZE,
+                                10,
                             ),
                         )
                         snakeLength++
                         currentScore++
                     } else {
                         currentFoodPoint = gameState.food
-                        currentSnakeSize.removeLast()
+                    }
+
+                    lastMovement = movement
+
+                    if (gameState.snake.contains(newPosition)) {
+                        snakeLength = 2
+                        onGameOver.invoke()
                     }
 
                     gameState.copy(
