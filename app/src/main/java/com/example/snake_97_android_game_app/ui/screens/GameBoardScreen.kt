@@ -37,6 +37,7 @@ fun GameBoardScreen(
                 .fillMaxWidth()
                 .weight(1f)
                 .padding(0.dp, 16.dp),
+            verticalAlignment = Alignment.CenterVertically,
         ) {
             IconButton(
                 onClick = { activity.finish() },

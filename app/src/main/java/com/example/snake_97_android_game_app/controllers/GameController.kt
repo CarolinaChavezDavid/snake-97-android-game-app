@@ -167,6 +167,7 @@ class GameController(
 
                     if (gameState.snake.contains(newPosition)) {
                         snakeLength = 2
+                        resetGame()
                         onGameOver.invoke()
                     }
 
